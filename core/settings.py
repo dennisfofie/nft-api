@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "nft_api",
     "rest_framework",
     "rest_framework_simplejwt",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -101,6 +102,14 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
+}
 
 
 # Internationalization
