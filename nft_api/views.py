@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import status, filters, generics
+from rest_framework import status, filters, generics, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from nft_api.serializer import NftSerializer
@@ -29,8 +29,30 @@ class ListCreateView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             response = {"status": "success", "data": serializer.data}
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=response, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NftDetailView(
+    generics.GenericAPIView,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
+    serializer_class = NftSerializer
+    queryset = Nft.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 
 class SearchNft(generics.ListAPIView):
@@ -39,3 +61,12 @@ class SearchNft(generics.ListAPIView):
     filterset_class = NftFilters
     search_fields = ["ratingAverage", "price", "name"]
     ordering_fields = "__all__"
+
+
+class Top10NftView(generics.ListAPIView):
+    serializer_class = NftSerializer
+    queryset = Nft.objects.all().order_by("-ratingAverage")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset[:10]
